@@ -1,0 +1,125 @@
+Get a look at the data:
+
+SELECT year, film, actor, words, sentences
+FROM `actor_metrics`
+LIMIT 10
+
+Get rid of extra column that imported:
+
+ALTER TABLE `actor_metrics`
+DROP MyUnknownColumn
+
+
+Task 1: Match a function that groups by a specific column (ex gender) and for that column- 
+sums the number of sentences spoken, words spoken, and counts the number of actors:
+
+SELECT gender, SUM(sentences) as sum_sent, SUM(words) as sum_words, COUNT(actor) as cnt_act
+FROM `actor_metrics`
+GROUP BY gender
+# This accomplishes the first task of summarizing the data and grouping it
+
+
+SELECT race, SUM(sentences) as sum_sent, SUM(words) as sum_words, COUNT(actor) as cnt_act
+FROM `actor_metrics`
+GROUP BY race
+
+SELECT race_simple, SUM(sentences) as sum_sent, SUM(words) as sum_words, COUNT(actor) as cnt_act
+FROM `actor_metrics`
+GROUP BY race_simple
+
+
+
+Task 2: Calculates these, but per year
+
+SELECT year, gender, SUM(sentences) as sum_sent, SUM(words) as sum_words, COUNT(actor) as cnt_act
+FROM `actor_metrics`
+GROUP BY gender, year
+
+
+SELECT year, race, SUM(sentences) as sum_sent, SUM(words) as sum_words, COUNT(actor) as cnt_act
+FROM `actor_metrics`
+GROUP BY race, year
+
+
+SELECT year, race_simple, SUM(sentences) as sum_sent, SUM(words) as sum_words, COUNT(actor) as cnt_act
+FROM `actor_metrics`
+GROUP BY race_simple, year
+
+
+TASK #3: For the single grouping (all years) find the % :
+
+SELECT 
+	gender, 
+    SUM(sentences) as sum_sent, 
+    SUM(words) as sum_words, 
+    COUNT(actor) as cnt_act,
+    SUM(sentences) * 100 / 
+		(SELECT SUM(sentences) from `actor_metrics`) as percent_sent,
+	SUM(words) * 100 / 
+		(SELECT SUM(words) from `actor_metrics`) as percent_words,
+	COUNT(actor) * 100 /
+		(SELECT COUNT(actor) from `actor_metrics`) as percent_actor
+FROM `actor_metrics`
+GROUP BY gender
+
+
+
+SELECT 
+	race,
+    SUM(sentences) as sum_sent, 
+    SUM(words) as sum_words, 
+    COUNT(actor) as cnt_act,
+    SUM(sentences) * 100 / 
+		(SELECT SUM(sentences) from `actor_metrics`) as percent_sent,
+	SUM(words) * 100 / 
+		(SELECT SUM(words) from `actor_metrics`) as percent_words,
+	COUNT(actor) * 100 /
+		(SELECT COUNT(actor) from `actor_metrics`) as percent_actor
+FROM `actor_metrics`
+GROUP BY race
+
+
+
+SELECT 
+	race_simple,
+    SUM(sentences) as sum_sent, 
+    SUM(words) as sum_words, 
+    COUNT(actor) as cnt_act,
+    SUM(sentences) * 100 / 
+		(SELECT SUM(sentences) from `actor_metrics`) as percent_sent,
+	SUM(words) * 100 / 
+		(SELECT SUM(words) from `actor_metrics`) as percent_words,
+	COUNT(actor) * 100 /
+		(SELECT COUNT(actor) from `actor_metrics`) as percent_actor
+FROM `actor_metrics`
+GROUP BY race_simple
+
+
+
+
+TASK 4: Percentages by year
+
+Pulling all of this into SQL queries had me writing all kinds of CTE’s, creating temporary tables, writing subqueries… 
+ultimately what I needed was a pivot so I could GROUP BY row and column and that did not appear to be working very well
+so after several hours I pulled the data into excel and did it in 15 minutes. I had wanted to do it all in SQL, but, 
+sometimes it is what it is and problem solving is the answer.
+
+
+
+TASK 5: Casting by category and film
+
+SELECT 
+film, year, gender,
+   	SUM(sentences) as sentences, 
+   	SUM(words) as words, 
+   	COUNT(actor) as actor
+FROM `actor_metrics`
+GROUP BY film, gender
+
+SELECT 
+	film, year, race_simple,
+    SUM(sentences) as sentences, 
+    SUM(words) as words, 
+    COUNT(actor) as actor
+FROM `actor_metrics`
+GROUP BY film, race_simple
