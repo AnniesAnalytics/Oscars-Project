@@ -1,3 +1,83 @@
+SECOND FILE (Following this notebook https://github.com/BuzzFeedNews/2018-03-oscars-script-diversity-analysis/blob/master/notebooks/calculate_word_frequencies.ipynb)
+
+#2
+
+ - - get rid of unknown column because I kept row names when importing
+ALTER TABLE `character_word_counts`
+DROP MyUnknownColumn
+
+
+-- Left Join, with a CTE thrown in there just because I have been practicing with them
+WITH counts
+AS
+(
+SELECT *
+FROM `character_word_counts`
+)
+SELECT c.year, c.film, c.character, c.actor, c.word, c.count, a.gender, a.race_simple
+FROM `counts` as c
+LEFT JOIN `actor_metrics` AS a 
+	ON c.actor = a.actor
+
+
+-- Creating a table to work from
+CREATE TABLE actor_word AS
+SELECT c.year, c.film, c.character, c.actor, c.word, c.count, a.gender, a.race_simple
+FROM `character_word_counts` as c
+LEFT JOIN `actor_metrics` AS a 
+	ON c.actor = a.actor
+
+
+SELECT *
+FROM `actor_word`
+LIMIT 30
+
+
+-- Preview the total counts of non-stopwords
+SELECT year, film, gender, SUM(count)
+FROM `actor_word`
+GROUP BY film, gender
+
+
+-- count # of words per gender
+SELECT film, word, gender, SUM(count) as total_count
+FROM `actor_word`
+GROUP BY film, word
+ORDER BY film, gender, SUM(COUNT) desc
+
+-- count # of words per gender
+SELECT film, word, race_simple, SUM(count) as total_count
+FROM `actor_word`
+GROUP BY film, word
+ORDER BY film, race_simple, SUM(COUNT) desc
+
+
+-- count # of words per gender per film
+WITH words AS
+(SELECT film, word, gender, SUM(count) as total_count
+FROM `actor_word`
+GROUP BY film, word
+ORDER BY film, gender, total_count desc)
+SELECT * 
+FROM `words`
+WHERE total_count > 5
+
+
+
+-- count # of words per race per film
+WITH words AS
+(SELECT film, word, race_simple, SUM(count) as total_count
+FROM `actor_word`
+GROUP BY film, word
+ORDER BY film, race_simple, total_count desc)
+SELECT * 
+FROM `words`
+WHERE total_count > 5
+
+
+
+
+
 Get a look at the data:
 
 SELECT year, film, actor, words, sentences
@@ -123,3 +203,6 @@ SELECT
     COUNT(actor) as actor
 FROM `actor_metrics`
 GROUP BY film, race_simple
+
+
+
